@@ -1,0 +1,19 @@
+classdef BackpropLayer
+    properties
+       layerCount
+
+    end
+
+    methods
+        function this = BackpropLayer()
+
+        end
+
+        %create the output of the layer using the
+        function output = forward(input)
+
+        end
+
+    end
+
+end
