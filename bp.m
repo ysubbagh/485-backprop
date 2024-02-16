@@ -15,7 +15,7 @@ classdef BackpropLayer
         function this = BackpropLayer(inputCount, hiddenCount, outputCount)
             this.inputSize = inputCount;
             this.outputSize = outputCount;
-            
+            this.hiddenSize = hiddenCount;
         end
 
         %% forward, create the output of the layer passed an input set
