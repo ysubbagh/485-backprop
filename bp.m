@@ -1,14 +1,21 @@
 classdef BackpropLayer
-    properties (Access = protected)
-        layerCount
-        transerFunc
+    properties
+        inputSize
+        hiddenSize
+        outputSize
+        %layers, each has weights, bias, and transfer function
+        inputLayer
+        hiddenLayer
+        outputLayer
         learningRate
     end
 
     methods
         %% constructor
-        function this = BackpropLayer()
-
+        function this = BackpropLayer(inputCount, hiddenCount, outputCount)
+            this.inputSize = inputCount;
+            this.outputSize = outputCount;
+            
         end
 
         %% forward, create the output of the layer passed an input set
@@ -57,13 +64,22 @@ classdef BackpropLayer
 
         %log sigmoid
         function f = logsig(this, n)
-            denom = 1 + exp(n);
-            f = 1 / denom;
+            denom = 1 + exp(-n);
+            f = 1. / denom;
         end
 
         %% use backprop learning to update the weights
         function this = train(this, input, target)
 
+        end
+
+        %% set functions
+        function this = setLearningRate(this, newRate)
+            this.learningRate = newRate;
+        end
+
+        function this = setHiddenLayerSize(this, newSize)
+            this.hiddenSize = newSize;
         end
 
     end
