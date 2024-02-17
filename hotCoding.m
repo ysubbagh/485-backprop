@@ -1,5 +1,8 @@
 %% setup layer
-network = BackpropLayer(30,10,3);
+network = BackpropLayer(30,10,3, 0.1);
+network.outputLayer.transferFunc = "hardlim";
+network.hiddenLayer.transferFunc = "logsig";
+
 
 %% input patterns
 p0 = [-1 1 1 1 -1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 -1 1 1 1 -1];

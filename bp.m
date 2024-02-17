@@ -4,7 +4,6 @@ classdef BackpropLayer
         hiddenSize
         outputSize
         %layers, each has weights, bias, and transfer function
-        inputLayer
         hiddenLayer
         outputLayer
         learningRate
@@ -12,10 +11,19 @@ classdef BackpropLayer
 
     methods
         %% constructor
-        function this = BackpropLayer(inputCount, hiddenCount, outputCount)
+        function this = BackpropLayer(inputCount, hiddenCount, outputCount, learnRate)
+            % setup size counts
             this.inputSize = inputCount;
             this.outputSize = outputCount;
             this.hiddenSize = hiddenCount;
+            % randomize weights
+            this.hiddenLayer.weights = randn(hiddenSize, inputSize);
+            this.outputLayer.weights = randn(outputSize, hiddenSize);
+            % randomize bias
+            this.hiddenLayer.bias = randn(hiddenSize, 1);
+            this.outputLayer.bias = randn(outputSize, 1);
+            % set inital learning rate
+            this.learningRate = learnRate;
         end
 
         %% forward, create the output of the layer passed an input set
@@ -23,7 +31,7 @@ classdef BackpropLayer
 
         end
 
-        %factory function to help forward
+        %factory function to help forward, send to correct function
         function func = doFunc(this, n)
             switch this.transferFunc
                 case "hardlim"
@@ -86,8 +94,9 @@ classdef BackpropLayer
 
     methods(Static)
         %mean-squared error function
-        function error = msError()
-
+        function error = msError(observed, predicted)
+            residual = observed - predicted;
+            error = power(residual, 2);
         end
     end
 
