@@ -1,8 +1,7 @@
 %% setup layer
-network = BackpropLayer(30,10,3, 0.1);
-network.outputLayer.transferFunc = "hardlim";
-network.hiddenLayer.transferFunc = "logsig";
-
+network = BackpropLayer(30, 10, 3, 0.1);
+network.outputLayer.transferFunc = "logsig";
+network.hiddenLayer.transferFunc = "hardlim";
 
 %% input patterns
 p0 = [-1 1 1 1 -1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 -1 1 1 1 -1];
@@ -17,4 +16,7 @@ t2 = [0 0 1]';
 t = [t0 t1 t2];
 
 %% train layer
+output = network.forward(p0');
+
+disp(output);
 

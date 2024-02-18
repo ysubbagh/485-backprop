@@ -17,23 +17,26 @@ classdef BackpropLayer
             this.outputSize = outputCount;
             this.hiddenSize = hiddenCount;
             % randomize weights
-            this.hiddenLayer.weights = randn(hiddenSize, inputSize);
-            this.outputLayer.weights = randn(outputSize, hiddenSize);
+            this.hiddenLayer.weights = randn(this.hiddenSize, this.inputSize);
+            this.outputLayer.weights = randn(this.outputSize, this.hiddenSize);
             % randomize bias
-            this.hiddenLayer.bias = randn(hiddenSize, 1);
-            this.outputLayer.bias = randn(outputSize, 1);
+            this.hiddenLayer.bias = randn(this.hiddenSize, 1);
+            this.outputLayer.bias = randn(this.outputSize, 1);
             % set inital learning rate
             this.learningRate = learnRate;
         end
 
         %% forward, create the output of the layer passed an input set
         function output = forward(this, input)
-
+            % Compute hidden layer output
+            hiddenOutput = this.doFunc((this.hiddenLayer.weights * input + this.hiddenLayer.bias), this.hiddenLayer.transferFunc);
+            % Compute output layer output
+            output = this.doFunc((this.outputLayer.weights * hiddenOutput + this.outputLayer.bias), this.outputLayer.transferFunc);
         end
 
         %factory function to help forward, send to correct function
-        function func = doFunc(this, n)
-            switch this.transferFunc
+        function func = doFunc(this, n, do)
+            switch do
                 case "hardlim"
                     func = this.hardlim(n);
                 case "hardlims"
@@ -49,11 +52,7 @@ classdef BackpropLayer
 
         %hard limit
         function f = hardlim(this, n)
-            if(n < 0)
-                f = 0;
-            else %if n >= 0
-                f = 1;
-            end
+            f = n >= 0;
         end
 
         %symetrical hard limit
