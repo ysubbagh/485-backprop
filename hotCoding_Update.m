@@ -21,7 +21,15 @@ t2 = [0 0 1]';
 t = [t0 t1 t2];
 
 %% train layer
-network.forward(p0');
+% network.forward(p2');
+% 
+% 
+% network.backward(t2');
+% network.forward(p2');
+% network.backward(t2');
+% network.forward(p2');
+% network.backward(t2');
+% network.forward(p2;
 
-
-network.backward(t0');
+epoch = 5;
+network.train(t0',p0', epoch);

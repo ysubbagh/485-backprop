@@ -53,7 +53,7 @@ classdef BackpropLayer_Update < handle
             this.finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
             % Output layer activation value
             this.finalOutput = this.doFunc((this.finalInput), this.outputLayer.transferFunc);
-            output = this.finalOutput;
+            % output = this.finalOutput;
         end
 
         %factory function to help forward, send to correct function
@@ -91,7 +91,7 @@ classdef BackpropLayer_Update < handle
             f = n;
         end
 
-        %log sigmoid
+        %% Log sigmoid
         % We will also be taking the derivative as this
         % is our function for the hidden layer 
         % We have added a boolean parameter to indicate
@@ -108,12 +108,6 @@ classdef BackpropLayer_Update < handle
                 f = sigmoidVal;
             end
         end
-
-        %% use backprop learning to update the weights
-        function this = train(this, input, target)
-
-        end
-
         %% set functions
         function this = setLearningRate(this, newRate)
             this.learningRate = newRate;
@@ -137,9 +131,6 @@ classdef BackpropLayer_Update < handle
             % This computes the sensitivity of the output layer
             % S(m+1) =  -2 * f'(n) * e(t-a)
             outputSensitivity = -2 .* (derivOutput' .* outputError);
-
-            disp("BEFORE UPDATE")
-            disp(this.outputLayer.weights);
             
             %% Update Outer Layer Weights
             % We can now use outputSensitivity to update the weight
@@ -148,9 +139,6 @@ classdef BackpropLayer_Update < handle
             val = (outputSensitivity .* this.hiddenOutput);
             finalValue = this.learningRate .* val;
             this.outputLayer.weights = this.outputLayer.weights - finalValue';
-            
-            disp("AFTER UPDATE")
-            disp(this.outputLayer.weights);
 
             %% Compute Hidden Layer Sensitivity
             % First we need to get the sensitivity of the
@@ -161,11 +149,21 @@ classdef BackpropLayer_Update < handle
             
             %% Update Hidden Layer Weights
             % W(m) = W(m) - learningRate * S(m) * P
-            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');
-
-
-            
+            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');          
         end
+
+            %% Train() Function
+            % Iterate using the number of epochs given 
+            % through forward and backward functions
+            % To compute accurate parameters and 
+            % get the desired output
+            function this = train(this, testPattern, input, epoch)
+                for i = 1:epoch
+                    this.forward(input);
+                    this.backward(testPattern);
+                end
+                disp(this.finalOutput >= 0.5);
+            end
 
     end
 
