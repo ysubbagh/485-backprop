@@ -1,4 +1,4 @@
-classdef BackpropLayer < handle
+classdef BackpropLayer_Update < handle
     properties
         inputSize
         hiddenSize
@@ -8,6 +8,10 @@ classdef BackpropLayer < handle
         outputLayer
         learningRate
         
+        % The n before sent to transfer function
+        hiddenInput
+        finalInput
+
         % Activation Output for each layer
         hiddenOutput
         finalOutput
@@ -19,7 +23,7 @@ classdef BackpropLayer < handle
 
     methods
         %% constructor
-        function this = BackpropLayer(inputCount, hiddenCount, outputCount, learnRate)
+        function this = BackpropLayer_Update(inputCount, hiddenCount, outputCount, learnRate)
             % setup size counts
             this.inputSize = inputCount;
             this.outputSize = outputCount;
@@ -41,14 +45,14 @@ classdef BackpropLayer < handle
         function this = forward(this, input)
             this.inputPattern = input;
             % Compute hidden layer input
-            hiddenInput = this.hiddenLayer.weights * input + this.hiddenLayer.bias;
+            this.hiddenInput = this.hiddenLayer.weights * input + this.hiddenLayer.bias;
             % Hidden layer activation value
-            this.hiddenOutput = this.doFunc((hiddenInput), this.hiddenLayer.transferFunc);
+            this.hiddenOutput = this.doFunc((this.hiddenInput), this.hiddenLayer.transferFunc);
 
             % Compute output layer output
-            finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
+            this.finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
             % Output layer activation value
-            this.finalOutput = this.doFunc((finalInput), this.outputLayer.transferFunc);
+            this.finalOutput = this.doFunc((this.finalInput), this.outputLayer.transferFunc);
             output = this.finalOutput;
         end
 
@@ -99,7 +103,7 @@ classdef BackpropLayer < handle
             denom = 1 + exp(-n);
             sigmoidVal = 1 ./ denom;
             if deriv
-                f = sigmoidVal / (1 - sigmoidVal);
+                f = (sigmoidVal ./ (1 - sigmoidVal));
             else
                 f = sigmoidVal;
             end
@@ -121,34 +125,42 @@ classdef BackpropLayer < handle
 
         % Backward function that will utilize backpropagation
         function this = backward(this, testPattern)
+
+            %% Compute Output Layer Sensitivity
             % Find the error in the output layer
             % outputError = t - a
             outputError = testPattern - this.finalOutput';
 
             % This will be the derivative of our f(n) function
-            derivOutput = this.sigmoid(this.finalOutput,true);
+            derivOutput = this.sigmoid(this.finalInput,true);
 
             % This computes the sensitivity of the output layer
             % S(m+1) =  -2 * f'(n) * e(t-a)
-            outputSensitivity = derivOutput * outputError';
+            outputSensitivity = -2 .* (derivOutput' .* outputError);
 
             disp("BEFORE UPDATE")
             disp(this.outputLayer.weights);
             
             %% Update Outer Layer Weights
             % We can now use outputSensitivity to update the weight
-            % of our output layer: W(m+1) = W(m+1) - learningRate * S(m+1) * P
-            val = (outputSensitivity * this.hiddenOutput');
+            % of our output layer: 
+            % W(m+1) = W(m+1) - learningRate * S(m+1) * a(m-1)
+            val = (outputSensitivity .* this.hiddenOutput);
             finalValue = this.learningRate .* val;
-            this.outputLayer.weights = this.outputLayer.weights - finalValue;
+            this.outputLayer.weights = this.outputLayer.weights - finalValue';
+            
+            disp("AFTER UPDATE")
+            disp(this.outputLayer.weights);
 
-            %% Update Hidden Layer Weights
+            %% Compute Hidden Layer Sensitivity
             % First we need to get the sensitivity of the
             % hidden layer and its precursors
             % S(m) = S(m+1) * W(m+1) * f'(m)
-            derivHidden = this.sigmoid(this.hiddenOutput, true);
-            hiddenSensitivity = outputSensitivity * this.hiddenLayer.weights * derivHidden;
-
+            derivHidden = this.sigmoid(this.hiddenInput, true);
+            hiddenSensitivity = (this.outputLayer.weights' * outputSensitivity') .* derivHidden;
+            
+            %% Update Hidden Layer Weights
+            % W(m) = W(m) - learningRate * S(m) * P
             this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');
 
 

@@ -1,8 +1,10 @@
+import BackpropLayer_Update.*
+
 %% setup layer
 % Initialize the network with an input size of 30
 % a hidden layer of 10 neurons, and an output layer
 % equal to the number of values being identified
-network = BackpropLayer(30, 10, 3, 0.1);
+network = BackpropLayer_Update(30, 10, 3, 0.1);
 network.outputLayer.transferFunc = "logsig";
 network.hiddenLayer.transferFunc = "logsig";
 
