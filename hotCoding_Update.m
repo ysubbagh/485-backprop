@@ -4,7 +4,7 @@ import BackpropLayer_Update.*
 % Initialize the network with an input size of 30
 % a hidden layer of 10 neurons, and an output layer
 % equal to the number of values being identified
-network = BackpropLayer_Update(30, 10, 3, 0.1);
+network = BackpropLayer_Update(30, 10, 3, 0.001);
 network.outputLayer.transferFunc = "logsig";
 network.hiddenLayer.transferFunc = "logsig";
 
@@ -31,7 +31,7 @@ t = [t0' t1' t2'];
 % network.backward(t2');
 % network.forward(p2;
 
-epoch = 5;
+epoch = 1000;
 network = network.train(t0,p0', epoch);
 network = network.train(t1,p1', epoch);
 network = network.train(t2,p2', epoch);
@@ -49,6 +49,16 @@ end
 %}
 
 
-output = network.compute(p2');
-disp("output");
+%% testing
+output = network.compute(p0');
+disp("output p0");
 disp(output);
+
+output = network.compute(p1');
+disp("output p1");
+disp(output);
+
+output = network.compute(p2');
+disp("output p2");
+disp(output);
+

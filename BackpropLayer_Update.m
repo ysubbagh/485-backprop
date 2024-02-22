@@ -118,7 +118,7 @@ classdef BackpropLayer_Update < handle
             denom = 1.0 + exp(-n);
             sigmoidVal = 1.0 ./ denom;
             if deriv
-                f = (sigmoidVal ./ (1.0 - sigmoidVal));
+                f = exp(-n) / power(denom, 2);
             else
                 f = sigmoidVal;
             end
@@ -141,11 +141,12 @@ classdef BackpropLayer_Update < handle
             outputError = testPattern - this.finalOutput';
 
             % This will be the derivative of our f(n) function
-            derivOutput = this.sigmoid(this.finalInput,true);
+            derivOutput = this.sigmoid(this.finalInput', true);
 
             % This computes the sensitivity of the output layer
             % S(m+1) =  -2 * f'(n) * e(t-a)
-            outputSensitivity = -2 .* (derivOutput' .* outputError);
+            outputSensitivity = -2 .* (derivOutput .* outputError);
+           
             
             %% Update Outer Layer Weights
             % We can now use outputSensitivity to update the weight
@@ -161,12 +162,13 @@ classdef BackpropLayer_Update < handle
             % First we need to get the sensitivity of the
             % hidden layer and its precursors
             % S(m) = S(m+1) * W(m+1) * f'(m)
-            derivHidden = this.sigmoid(this.hiddenInput, true);
+            derivHidden = this.sigmoid(this.hiddenInput', true);
             hiddenSensitivity = (this.outputLayer.weights' * outputSensitivity') .* derivHidden;
             
+
             %% Update Hidden Layer Weights
             % W(m) = W(m) - learningRate * S(m) * P
-            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');      
+            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate .* (hiddenSensitivity * this.inputPattern');      
             %update the bias
             this.hiddenLayer.bias = this.hiddenLayer.bias - (this.learningRate * hiddenSensitivity);
         end
@@ -181,7 +183,7 @@ classdef BackpropLayer_Update < handle
                     this.forward(input);
                     this.backward(testPattern);
                 end
-                disp(this.finalOutput >= 0.5);
+                %disp(this.finalOutput >= 0.5);
             end
 
     end
