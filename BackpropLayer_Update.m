@@ -97,7 +97,7 @@ classdef BackpropLayer_Update < handle
         % We have added a boolean parameter to indicate
         % when to return the derived f 
         function f = sigmoid(this, n, deriv)
-            if nargin <3
+            if nargin < 3
                 deriv = false; % Defualt if not provided
             end
             denom = 1 + exp(-n);
@@ -139,6 +139,8 @@ classdef BackpropLayer_Update < handle
             val = (outputSensitivity .* this.hiddenOutput);
             finalValue = this.learningRate .* val;
             this.outputLayer.weights = this.outputLayer.weights - finalValue';
+            %update the bias
+            this.outputLayer.bias = this.outputLayer.bias - (this.learningRate * outputSensitivity');
 
             %% Compute Hidden Layer Sensitivity
             % First we need to get the sensitivity of the
@@ -149,7 +151,9 @@ classdef BackpropLayer_Update < handle
             
             %% Update Hidden Layer Weights
             % W(m) = W(m) - learningRate * S(m) * P
-            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');          
+            this.hiddenLayer.weights = this.hiddenLayer.weights - this.learningRate * (hiddenSensitivity * this.inputPattern');      
+            %update the bias
+            this.hiddenLayer.bias = this.hiddenLayer.bias - (this.learningRate * hiddenSensitivity);
         end
 
             %% Train() Function
