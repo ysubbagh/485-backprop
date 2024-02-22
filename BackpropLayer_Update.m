@@ -156,7 +156,6 @@ classdef BackpropLayer_Update < handle
             % S(m) = S(m+1) * W(m+1) * f'(m)
             derivHidden = (this.sigmoid(this.hiddenInput, true));
             hiddenSensitivity = (this.outputLayer.weights' * outputSensitivity) .* derivHidden;
-            
 
             %% Update Hidden Layer Weights
             % W(m) = W(m) - learningRate * S(m) * P
