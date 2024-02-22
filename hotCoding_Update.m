@@ -41,6 +41,7 @@ end
 
 
 %% testing
+%{
 output = network.compute(p0');
 disp("output for p0");
 disp(output);
@@ -52,5 +53,108 @@ disp(output);
 output = network.compute(p2');
 disp("output for p2");
 disp(output);
+%}
+
+%% noisy testing
+% Initialize accuracy matrix
+numVersions = 50;
+noiseLevels = [0 4 8];
+accuracyMatrix = zeros(length(noiseLevels), 1);
 
 
+for i=1:length(noiseLevels)
+    noiseLevel = noiseLevels(i);
+    correctCount = 0; 
+
+    for k=1:numVersions
+
+        for j=0:2 %get the patterns
+            %make noisy 
+            inputPattern = getPattern(j);
+            targetVal = getTarget(j);
+            noisyInput = addNoise(inputPattern, noiseLevel);
+    
+            %classify
+            output = network.compute(noisyInput);
+    
+            %check correctness
+            if isCorrect(output, targetVal)
+                correctCount = correctCount + 1;
+            end
+   
+        end 
+
+    end
+    
+    accuracyMatrix(i) = (correctCount / (numVersions * 3)) * 100;
+
+end
+
+disp("accuracy");
+disp(accuracyMatrix);
+
+%% Plot the graph
+xTicks = [0, 4, 8]; % Define the x-axis ticks
+figure;
+hold on;
+plot(noiseLevels, accuracyMatrix, '-o');
+hold off;
+xlabel('Number of Pixels Flipped');
+ylabel('Classification Accuracy (%)');
+title('Network Performance of 3-Layer Backpropagation with Noisy Inputs');
+grid on;
+xticks(0:8); % Set x-axis ticks to integers from 2 to 6
+
+
+
+%% helper functions
+
+%%addNoise to a vector, distort it 
+function pvec = addNoise(pvec, num)
+    % ADDNOISE Add noise to "binary" vector
+    % pvec pattern vector (-1 and 1)
+    % num number of elements to flip randomly
+    % Handle special case where there's no noise
+    if num == 0
+        return;
+    end
+    % first, generate a random permutation of all indices into pvec
+    inds = randperm(length(pvec));
+    % then, use the first n elements to flip pixels
+    pvec(inds(1:num)) = -pvec(inds(1:num));
+end 
+
+% check for correctness
+function correct = isCorrect(output, target)
+    [~, predictedClass] = max(output);
+    [~, trueClass] = max(target);
+    correct = predictedClass == trueClass;
+end
+
+%get pattern
+function pattern = getPattern(num)
+    switch num
+        case 0
+            pattern = [-1 1 1 1 -1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 1 -1 -1 -1 1 -1 1 1 1 -1]';
+        case 1
+            pattern = [-1 1 1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1]';
+        case 2
+            pattern = [1 1 1 -1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1 1 1 -1 -1 -1 1 -1 -1 -1 -1 1 1 1 1]';
+        otherwise
+            error("Invalid paatern retrival.");
+    end
+end 
+
+%get target
+function target = getTarget(num)
+    switch num
+        case 0
+            target = [1 0 0]';
+        case 1
+            target = [0 1 0]';
+        case 2
+            target = [0 0 1]';
+        otherwise
+            error("Invalid paatern retrival.");
+    end
+end 
