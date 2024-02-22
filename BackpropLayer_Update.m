@@ -54,7 +54,6 @@ classdef BackpropLayer_Update < handle
             this.finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
             % Output layer activation value
             this.finalOutput = this.doFunc((this.finalInput), this.outputLayer.transferFunc);
-            % output = this.finalOutput;
         end
 
         %for ease of printing, return the final output
