@@ -58,16 +58,7 @@ classdef BackpropLayer_Update < handle
 
         %for ease of printing, return the final output
         function out = compute(this, input)
-            this.inputPattern = input;
-            % Compute hidden layer input
-            this.hiddenInput = this.hiddenLayer.weights * input + this.hiddenLayer.bias;
-            % Hidden layer activation value
-            this.hiddenOutput = this.doFunc((this.hiddenInput), this.hiddenLayer.transferFunc);
-
-            % Compute output layer output
-            this.finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
-            % Output layer activation value
-            this.finalOutput = this.doFunc((this.finalInput), this.outputLayer.transferFunc);
+            this.forward(input);
             out = (this.finalOutput >= 0.5);
         end
 
@@ -138,32 +129,31 @@ classdef BackpropLayer_Update < handle
             %% Compute Output Layer Sensitivity
             % Find the error in the output layer
             % outputError = t - a
-            outputError = testPattern - this.finalOutput';
+            outputError = testPattern' - this.finalOutput;
 
             % This will be the derivative of our f(n) function
             derivOutput = this.sigmoid(this.finalInput', true);
 
             % This computes the sensitivity of the output layer
             % S(m+1) =  -2 * f'(n) * e(t-a)
-            outputSensitivity = -2 .* (derivOutput .* outputError);
-           
+            outputSensitivity = -2 .* (derivOutput' .* outputError);
             
             %% Update Outer Layer Weights
             % We can now use outputSensitivity to update the weight
             % of our output layer: 
             % W(m+1) = W(m+1) - learningRate * S(m+1) * a(m-1)
-            val = (outputSensitivity .* this.hiddenOutput);
+            val = (outputSensitivity * this.hiddenOutput');
             finalValue = this.learningRate .* val;
-            this.outputLayer.weights = this.outputLayer.weights - finalValue';
+            this.outputLayer.weights = this.outputLayer.weights - finalValue;
             %update the bias
-            this.outputLayer.bias = this.outputLayer.bias - (this.learningRate * outputSensitivity');
+            this.outputLayer.bias = this.outputLayer.bias - (this.learningRate * outputSensitivity);
 
             %% Compute Hidden Layer Sensitivity
             % First we need to get the sensitivity of the
             % hidden layer and its precursors
             % S(m) = S(m+1) * W(m+1) * f'(m)
-            derivHidden = this.sigmoid(this.hiddenInput', true);
-            hiddenSensitivity = (this.outputLayer.weights' * outputSensitivity') .* derivHidden;
+            derivHidden = (this.sigmoid(this.hiddenInput', true));
+            hiddenSensitivity = (this.outputLayer.weights' * outputSensitivity) .* derivHidden;
             
 
             %% Update Hidden Layer Weights
@@ -183,7 +173,7 @@ classdef BackpropLayer_Update < handle
                     this.forward(input);
                     this.backward(testPattern);
                 end
-                %disp(this.finalOutput >= 0.5);
+                disp(this.finalOutput >= 0.5);
             end
 
     end
