@@ -32,4 +32,7 @@ t = [t0 t1 t2];
 % network.forward(p2;
 
 epoch = 5;
-network.train(t0',p0', epoch);
+network = network.train(t0',p0', epoch);
+
+output = network.compute(p0');
+disp(output);

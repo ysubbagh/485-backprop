@@ -56,6 +56,21 @@ classdef BackpropLayer_Update < handle
             % output = this.finalOutput;
         end
 
+        %for ease of printing, return the final output
+        function out = compute(this, input)
+            this.inputPattern = input;
+            % Compute hidden layer input
+            this.hiddenInput = this.hiddenLayer.weights * input + this.hiddenLayer.bias;
+            % Hidden layer activation value
+            this.hiddenOutput = this.doFunc((this.hiddenInput), this.hiddenLayer.transferFunc);
+
+            % Compute output layer output
+            this.finalInput = this.outputLayer.weights * this.hiddenOutput + this.outputLayer.bias;
+            % Output layer activation value
+            this.finalOutput = this.doFunc((this.finalInput), this.outputLayer.transferFunc);
+            out = (this.finalOutput >= 0.5);
+        end
+
         %factory function to help forward, send to correct function
         function func = doFunc(this, n, do)
             switch do
@@ -100,10 +115,10 @@ classdef BackpropLayer_Update < handle
             if nargin < 3
                 deriv = false; % Defualt if not provided
             end
-            denom = 1 + exp(-n);
-            sigmoidVal = 1 ./ denom;
+            denom = 1.0 + exp(-n);
+            sigmoidVal = 1.0 ./ denom;
             if deriv
-                f = (sigmoidVal ./ (1 - sigmoidVal));
+                f = (sigmoidVal ./ (1.0 - sigmoidVal));
             else
                 f = sigmoidVal;
             end
