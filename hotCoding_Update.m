@@ -15,10 +15,10 @@ p2 = [1 1 1 -1 -1 -1 -1 -1 1 -1 -1 -1 -1 1 -1 -1 1 1 -1 -1 -1 1 -1 -1 -1 -1 1 1 
 p = [p0' p1' p2'];
 
 % target patterns
-t0 = [1 0 0]';
-t1 = [0 1 0]';
-t2 = [0 0 1]';
-t = [t0 t1 t2];
+t0 = [1 0 0];
+t1 = [0 1 0];
+t2 = [0 0 1];
+t = [t0' t1' t2'];
 
 %% train layer
 % network.forward(p2');
@@ -32,7 +32,23 @@ t = [t0 t1 t2];
 % network.forward(p2;
 
 epoch = 5;
-network = network.train(t0',p0', epoch);
+network = network.train(t0,p0', epoch);
+network = network.train(t1,p1', epoch);
+network = network.train(t2,p2', epoch);
 
-output = network.compute(p0');
+
+%{
+for i = 1:size(p, 2)
+    % Get the ith input pattern and target pattern
+    inputPattern = p(:, i);
+    targetPattern = t(:, i);
+    
+    % Train the network with the current input and target pattern
+    network = network.train(targetPattern', inputPattern, epoch);
+end
+%}
+
+
+output = network.compute(p2');
+disp("output");
 disp(output);
