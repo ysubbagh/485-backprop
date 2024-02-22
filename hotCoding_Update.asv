@@ -101,9 +101,9 @@ plot(noiseLevels, accuracyMatrix, '-o');
 hold off;
 xlabel('Number of Pixels Flipped');
 ylabel('Classification Accuracy (%)');
-title('Network Performance of 3-Layer Backpropagation with Noisy Inputs');
+title('Network Performance with Noisy Inputs');
 grid on;
-xticks(0:8); % Set x-axis ticks to integers from 2 to 6
+xticks(:6); % Set x-axis ticks to integers from 2 to 6
 
 
 
