@@ -4,7 +4,7 @@ import BackpropLayer_Update.*
 % Initialize the network with an input size of 30
 % a hidden layer of 10 neurons, and an output layer
 % equal to the number of values being identified
-network = BackpropLayer_Update(30, 16, 3, 0.00001);
+network = BackpropLayer_Update(30, 20, 3, 0.0001);
 network.outputLayer.transferFunc = "logsig";
 network.hiddenLayer.transferFunc = "logsig";
 
@@ -21,26 +21,26 @@ t2 = [0 0 1];
 t = [t0' t1' t2'];
 
 %% training the network
-epoch = 500000;
+epoch = 50000;
 %{
 network = network.train(t0,p0', epoch);
 network = network.train(t1,p1', epoch);
 network = network.train(t2,p2', epoch);
 %}
 
-
-for i = 1:size(p, 2)
-    % Get the ith input pattern and target pattern
-    inputPattern = p(:, i);
-    targetPattern = t(:, i);
-    
-    % Train the network with the current input and target pattern
-    network = network.train(targetPattern', inputPattern, epoch);
+for rounds = 1:epoch
+    for i = 1:size(p, 2)
+        % Get the ith input pattern and target pattern
+        inputPattern = p(:, i);
+        targetPattern = t(:, i);
+        
+        % Train the network with the current input and target pattern
+        network = network.train(targetPattern', inputPattern, 1);
+    end
 end
 
 
 %% testing
-%{
 output = network.compute(p0');
 disp("output for p0");
 disp(output);
@@ -52,5 +52,5 @@ disp(output);
 output = network.compute(p2');
 disp("output for p2");
 disp(output);
-%}
+
 

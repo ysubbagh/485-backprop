@@ -174,7 +174,7 @@ classdef BackpropLayer_Update < handle
                     this.forward(input);
                     this.backward(testPattern);
                 end
-                disp(this.finalOutput >= 0.5);
+                %disp(this.finalOutput >= 0.5);
             end
 
     end
