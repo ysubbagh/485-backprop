@@ -67,18 +67,17 @@ accuracyMatrix = zeros(length(noiseLevels),1);
 for i = 1:length(noiseLevels)
     noiseLevel = noiseLevels(i);
     correctCount = 0;
-    
-    %create noise
-    noisyInput = addNoise(testImg ,noiseLevel);
+   
     
     % iter through the images in test data
-    for k = 1:size(noisyInput, 2)
+    for k = 1:size(testImg, 2)
         %get patterns
-        input = noisyInput(:, i);
+        input = testImg(:, i);
+        noisyInput = addNoise(input ,noiseLevel);
         target = testLabels(:, i);
 
         %classify
-        output = network.compute(input);
+        output = network.compute(noisyInput);
 
         %check correctness
         if isCorrect(output, target)
