@@ -33,7 +33,7 @@ for rounds = 1:epoch
         % Get the ith input pattern and target pattern
         inputPattern = p(:, i);
         targetPattern = t(:, i);
-        
+
         % Train the network with the current input and target pattern
         network = network.train(targetPattern', inputPattern, 1);
     end

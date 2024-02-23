@@ -1,5 +1,3 @@
-%% setup network
-% network = BackpropLayer_Update(30, 20, 3, 0.0001);
 import BackpropLayer_Update.*
 
 %% get data 
@@ -12,17 +10,48 @@ testLabelFile = 'mnist-data/t10k-labels.idx1-ubyte';
 % format data
 trainImg = loadMNISTImages(trainImgFile);
 trainLabels = loadMNISTLabels(trainLabelFile);
+trainLabels = trainLabels'; 
 testImg = loadMNISTImages(testImgFile);
 testLabels = loadMNISTLabels(testLabelFile);
+testLabels = testLabels';
+
+%shuffle the training data
 
 
 %% setup network
+% returns hot coded value 1-10
+network = BackpropLayer_Update(size(trainImg, 1), 20, 10, 0.001);
+network.outputLayer.transferFunc = "logsig";
+network.hiddenLayer.transferFunc = "logsig";
 
 
+%% do the training
+epoch = 20;
+
+for rounds = 1:epoch
+    for i = 1:size(trainImg, 2)
+        % Get the ith input pattern and target pattern
+        inputPattern = trainImg(:, i);
+        targetPattern = trainLabels(:, i);
+
+        % Train the network with the current input and target pattern
+        network = network.train(targetPattern', inputPattern, 1);
+    end
+end
 
 
+%% results
+for i = 1:size(testImg, 2)
+    correctCount = 0;
+    
 
-%% mnist helper function to parse data
+end
+
+accruacy = (correctCount / size(testImg, 2)) * 100;
+disp("accuracy = " + accruacy);
+
+
+%% mnist helper functions to parse data
 % parse labels
 function labels = loadMNISTLabels(filename)
     %loadMNISTLabels returns a [number of MNIST images]x1 matrix containing
@@ -56,4 +85,13 @@ function images = loadMNISTImages(filename)
     images = reshape(images, size(images, 1) * size(images, 2), size(images, 3));
     % Convert to double and rescale to [0,1]
     images = double(images) / 255;
+end
+
+%% vality helper functions
+
+% check for correctness
+function correct = isCorrect(output, target)
+    [~, predictedClass] = max(output);
+    [~, trueClass] = max(target);
+    correct = predictedClass == trueClass;
 end
