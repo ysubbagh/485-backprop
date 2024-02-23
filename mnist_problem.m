@@ -1,4 +1,5 @@
 import BackpropLayer_Update.*
+close all;
 
 %% get data 
 % file paths
@@ -28,7 +29,7 @@ epoch = 20;
 
 for rounds = 1:epoch
     for i = 1:size(trainImg, 2)
-        % Get the ith input pattern and target pattern
+        % Get the ith input pattern and target patterns
         inputPattern = trainImg(:, i);
         targetPattern = trainLabels(:, i);
 
@@ -41,18 +42,67 @@ end
 %% validty check
 correctCount = 0;
 for i = 1:size(testImg, 2)
+    % get patterns
     input = testImg(:, i);
     target = testLabels(:, i);
-
+    % classify
     output = network.compute(input);
-
+    % check correctness
     if isCorrect(output, target)
         correctCount = correctCount + 1;
     end
 end
-
+% check accuracy
 accruacy = (correctCount / size(testImg, 2)) * 100;
-disp("accuracy = " + accruacy);
+%disp("accuracy = " + accruacy + "%");
+
+
+%% testing for dirty data classification
+% setup noise and accuracy
+numVersions = 6;
+noiseLevels = [50 100 200 300 600];
+accuracyMatrix = zeros(length(noiseLevels),1);
+
+% test accuracy at each of the noise levels at same amount at training
+for i = 1:length(noiseLevels)
+    noiseLevel = noiseLevels(i);
+    correctCount = 0;
+    
+    %create noise
+    noisyInput = addNoise(testImg ,noiseLevel);
+    
+    % iter through the images in test data
+    for k = 1:size(noisyInput, 2)
+        %get patterns
+        input = noisyInput(:, i);
+        target = testLabels(:, i);
+
+        %classify
+        output = network.compute(input);
+
+        %check correctness
+        if isCorrect(output, target)
+            correctCount = correctCount + 1;
+        end
+    end
+
+    accuracyMatrix(i) = (correctCount / size(testImg, 2)) * 100;
+end
+
+%% print graph
+disp("accuracy");
+disp(accuracyMatrix);
+
+figure;
+hold on;
+plot(noiseLevels, accuracyMatrix, '-o', 'LineWidth',2);
+hold off;
+xticks(noiseLevels);
+xticklabels({'5', '10', '50', '100', '200'});  % Set custom labels for the x-ticks
+grid on;
+xlabel('Number Of Pixels Flipped');
+ylabel('Classification Accuracy (%)');
+title('Network Performance of Backpropogated Multilayer Network With Noisy Inputs');
 
 
 %% mnist helper functions to parse data
@@ -91,7 +141,7 @@ function images = loadMNISTImages(filename)
     images = double(images) / 255;
 end
 
-%% vality helper functions
+%% validity/testing helper functions
 
 % check for correctness
 function correct = isCorrect(output, target)
@@ -99,3 +149,18 @@ function correct = isCorrect(output, target)
     [~, trueClass] = max(target);
     correct = predictedClass == trueClass;
 end
+
+% addNoise to a vector, distort it 
+function pvec = addNoise(pvec, num)
+    % ADDNOISE Add noise to "binary" vector
+    % pvec pattern vector (-1 and 1)
+    % num number of elements to flip randomly
+    % Handle special case where there's no noise
+    if num == 0
+        return;
+    end
+    % first, generate a random permutation of all indices into pvec
+    inds = randperm(length(pvec));
+    % then, use the first n elements to flip pixels
+    pvec(inds(1:num)) = -pvec(inds(1:num));
+end 

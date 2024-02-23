@@ -1,4 +1,5 @@
 import BackpropLayer_Update.*
+close all;
 
 %% setup layer
 % Initialize the network with an input size of 30
@@ -85,11 +86,11 @@ for i=1:length(noiseLevels)
         end 
 
     end
-    
+    % compute accuracy
     accuracyMatrix(i) = (correctCount / (numVersions * 3)) * 100;
 
 end
-
+% results
 disp("accuracy");
 disp(accuracyMatrix);
 
