@@ -10,12 +10,10 @@ testLabelFile = 'mnist-data/t10k-labels.idx1-ubyte';
 % format data
 trainImg = loadMNISTImages(trainImgFile);
 trainLabels = loadMNISTLabels(trainLabelFile);
-trainLabels = trainLabels'; 
+trainLabels = trainLabels'; % format the matrix dimensions 
 testImg = loadMNISTImages(testImgFile);
 testLabels = loadMNISTLabels(testLabelFile);
 testLabels = testLabels';
-
-%shuffle the training data
 
 
 %% setup network
@@ -40,7 +38,7 @@ for rounds = 1:epoch
 end
 
 
-%% results
+%% validty check
 correctCount = 0;
 for i = 1:size(testImg, 2)
     input = testImg(:, i);
