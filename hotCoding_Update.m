@@ -5,7 +5,7 @@ close all;
 % Initialize the network with an input size of 30
 % a hidden layer of 10 neurons, and an output layer
 % equal to the number of values being identified
-network = BackpropLayer_Update(30, 20, 3, 0.0001);
+network = BackpropLayer_Update(30, 20, 3, 0.001);
 network.outputLayer.transferFunc = "logsig";
 network.hiddenLayer.transferFunc = "logsig";
 
@@ -22,7 +22,7 @@ t2 = [0 0 1];
 t = [t0' t1' t2'];
 
 %% training the network
-epoch = 50000;
+epoch = 500000;
 %{
 network = network.train(t0,p0', epoch);
 network = network.train(t1,p1', epoch);

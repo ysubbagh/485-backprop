@@ -19,9 +19,15 @@ testLabels = testLabels';
 
 %% setup network
 % returns hot coded value 1-10
-network = BackpropLayer_Update(size(trainImg, 1), 20, 10, 0.001);
+network = BackpropLayer_Update(size(trainImg, 1), 20, 10, 0.01);
+networkMed = BackpropLayer_Update(size(trainImg, 1), 50, 10, 0.01);
+networkLrg = BackpropLayer_Update(size(trainImg, 1), 200, 10, 0.01);
 network.outputLayer.transferFunc = "logsig";
 network.hiddenLayer.transferFunc = "logsig";
+networkMed.outputLayer.transferFunc = "logsig";
+networkMed.hiddenLayer.transferFunc = "logsig";
+networkLrg.outputLayer.transferFunc = "logsig";
+networkLrg.hiddenLayer.transferFunc = "logsig";
 
 
 %% do the training
@@ -35,6 +41,8 @@ for rounds = 1:epoch
 
         % Train the network with the current input and target pattern
         network = network.train(targetPattern', inputPattern, 1);
+        networkMed = networkMed.train(targetPattern', inputPattern, 1);
+        networkLrg = networkLrg.train(targetPattern', inputPattern, 1);
     end
 end
 
@@ -54,54 +62,72 @@ for i = 1:size(testImg, 2)
 end
 % check accuracy
 accruacy = (correctCount / size(testImg, 2)) * 100;
-%disp("accuracy = " + accruacy + "%");
+disp("accuracy = " + accruacy + "%");
+
 
 
 %% testing for dirty data classification
 % setup noise and accuracy
-numVersions = 6;
 noiseLevels = [50 100 200 300 600];
-accuracyMatrix = zeros(length(noiseLevels),1);
+accuracyMatrix = zeros(3, length(noiseLevels));
 
 % test accuracy at each of the noise levels at same amount at training
+
 for i = 1:length(noiseLevels)
     noiseLevel = noiseLevels(i);
-    correctCount = 0;
    
+    for j = 1:3
+        correctCount = 0;
+
+        % iter through the images in test data
+        for k = 1:size(testImg, 2)
+            %get patterns
+            input = testImg(:, k);
+            noisyInput = addNoise(input ,noiseLevel);
+            target = testLabels(:, k);
     
-    % iter through the images in test data
-    for k = 1:size(testImg, 2)
-        %get patterns
-        input = testImg(:, i);
-        noisyInput = addNoise(input ,noiseLevel);
-        target = testLabels(:, i);
+            %classify
+            switch j
+                case 1
+                    output = network.compute(noisyInput);
+                case 2
+                    output = networkMed.compute(noisyInput);
+                case 3
+                    output = networkLrg.compute(noisyInput);
+                otherwise
+                    error("shit broken");
+            end 
 
-        %classify
-        output = network.compute(noisyInput);
-
-        %check correctness
-        if isCorrect(output, target)
-            correctCount = correctCount + 1;
+            %check correctness
+            if isCorrect(output, target)
+                correctCount = correctCount + 1;
+            end
         end
-    end
 
-    accuracyMatrix(i) = (correctCount / size(testImg, 2)) * 100;
+        accuracyMatrix(j, i) = (correctCount / size(testImg, 2)) * 100;
+
+    end
 end
 
 %% print graph
 disp("accuracy");
 disp(accuracyMatrix);
 
+% Plotting accuracy for different networks
 figure;
 hold on;
-plot(noiseLevels, accuracyMatrix, '-o', 'LineWidth',2);
+plot(noiseLevels, accuracyMatrix(1, :), '-o', 'LineWidth',2, 'DisplayName', '20 Neuron Hidden Layer');
+plot(noiseLevels, accuracyMatrix(2, :), '-o', 'LineWidth',2, 'DisplayName', '50 Neuron Hidden Layer');
+plot(noiseLevels, accuracyMatrix(3, :), '-o', 'LineWidth',2, 'DisplayName', '200 Neuron Hidden Layer');
 hold off;
-xticks(noiseLevels);
-xticklabels({'5', '10', '50', '100', '200'});  % Set custom labels for the x-ticks
+
+% Customizing the plot
 grid on;
 xlabel('Number Of Pixels Flipped');
 ylabel('Classification Accuracy (%)');
-title('Network Performance of Backpropogated Multilayer Network With Noisy Inputs');
+title('Network Performance of Backpropagated Multilayer Network With Noisy Inputs');
+legend('Location', 'best');
+
 
 
 %% mnist helper functions to parse data
@@ -144,9 +170,23 @@ end
 
 % check for correctness
 function correct = isCorrect(output, target)
-    [~, predictedClass] = max(output);
-    [~, trueClass] = max(target);
-    correct = predictedClass == trueClass;
+    for i = 1:length(output)
+        if i == target
+            if output(i) == 1
+                correct = 1;
+            else 
+                correct = 0;
+            end
+        else
+            if output(i) == 1
+                correct = 0;
+                return
+            end
+        end
+    end
+    % [~, predictedClass] = max(output);
+    % [~, trueClass] = max(target);
+    % correct = predictedClass == trueClass;
 end
 
 % addNoise to a vector, distort it 
