@@ -31,7 +31,7 @@ networkLrg.hiddenLayer.transferFunc = "logsig";
 
 
 %% do the training
-epoch = 20;
+epoch = 5;
 
 for rounds = 1:epoch
     for i = 1:size(trainImg, 2)
@@ -174,16 +174,17 @@ function correct = isCorrect(output, target)
         if i == target
             if output(i) == 1
                 correct = 1;
+                return;
             else 
                 correct = 0;
             end
         else
             if output(i) == 1
                 correct = 0;
-                return
             end
         end
     end
+
     % [~, predictedClass] = max(output);
     % [~, trueClass] = max(target);
     % correct = predictedClass == trueClass;
